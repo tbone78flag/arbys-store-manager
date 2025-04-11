@@ -1,5 +1,6 @@
 package com.tristan;
 
+import views.LoginView;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -56,15 +57,17 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        mainStage = primaryStage;
         isDarkMode = loadDarkModePreference();
-        primaryStage.setFullScreenExitHint("");
-        this.mainStage = primaryStage;
+        isFullscreen = loadFullscreenPreference();
 
-        if (shouldRememberUser()) {
+        LoginView loginView = new LoginView(primaryStage, (username, role) -> {
+            currentUsername = username;
+            currentUserRole = role;
             showDashboard(primaryStage);
-        } else {
-            showLogin(primaryStage);
-        }
+        });
+
+        loginView.show();
     }
 
     private boolean loadDarkModePreference() {
@@ -147,74 +150,6 @@ public class Main extends Application {
 
     private Stage mainStage; //Aid for fullscreen window
 
-    private void showLogin(Stage stage) {
-        Label userLabel = new Label("Username:");
-        TextField usernameField = new TextField();
-        String savedUser = loadLastUsername();
-        if (savedUser != null) {
-            usernameField.setText(savedUser);
-        }
-        Label passLabel = new Label("Password:");
-        PasswordField passwordField = new PasswordField();
-        CheckBox rememberMeBox = new CheckBox("Remember me");
-        Button loginButton = new Button("🔓 Login");
-        Label messageLabel = new Label();
-
-        loginButton.setOnAction(e -> {
-            String user = usernameField.getText();
-            String pass = passwordField.getText();
-
-            if (user.equals("manager") && pass.equals("arbys2024")) {
-                saveLastUsername(user);
-                currentUsername = user;
-                currentUserRole = "manager";
-                if (rememberMeBox.isSelected()) {
-                    saveRememberPreference(true);
-                } else {
-                    saveRememberPreference(false);
-                }
-                showDashboard(stage);
-            }
-            else if (user.equals("team_lead") && pass.equals("lead2024")) {
-                saveLastUsername(user);
-                currentUsername = user;
-                currentUserRole = "team_lead";
-                if (rememberMeBox.isSelected()) {
-                    saveRememberPreference(true);
-                } else {
-                    saveRememberPreference(false);
-                }
-                showDashboard(stage);
-            }
-            else if (user.equals("trainer") && pass.equals("trainer2024")) {
-                saveLastUsername(user);
-                currentUsername = user;
-                currentUserRole = "trainer";
-                if (rememberMeBox.isSelected()) {
-                    saveRememberPreference(true);
-                } else {
-                    saveRememberPreference(false);
-                }
-                showDashboard(stage);
-            }
-            else {
-                messageLabel.setText("❌ Invalid username or password.");
-            }
-        });
-
-        VBox layout = new VBox(10, userLabel, usernameField, passLabel, passwordField, rememberMeBox, loginButton, messageLabel);
-        layout.setStyle("-fx-padding: 40; -fx-alignment: center; -fx-background-color: #f0f0f0;");
-        Scene scene = new Scene(layout, 400, 300);
-
-        scene.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case ENTER -> loginButton.fire();
-            }
-        });
-        stage.setTitle("Login - Arby’s Manager Simulator");
-        stage.setScene(scene);
-        stage.show();
-    }
 
     private void saveRememberPreference(boolean remember) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("remember.txt"))) {
@@ -289,13 +224,23 @@ public class Main extends Application {
         Button logoutButton = new Button("🚪 Log Out");
         logoutButton.setStyle("-fx-background-color: #999; -fx-text-fill: white;");
         logoutButton.setOnAction(e -> {
-            showLogin(stage);               // Go back to login screen
+            LoginView loginView = new LoginView(stage, (username, role) -> {
+                currentUsername = username;
+                currentUserRole = role;
+                showDashboard(stage);
+            });
+            loginView.show();
         });
         Button logoutForgetButton = new Button("🚪 Log Out & Forget Me");
         logoutForgetButton.setStyle("-fx-background-color: #999; -fx-text-fill: white;");
         logoutForgetButton.setOnAction(e -> {
             saveRememberPreference(false);  // Forget the user
-            showLogin(stage);               // Go back to login screen
+            LoginView loginView = new LoginView(stage, (username, role) -> {
+                currentUsername = username;
+                currentUserRole = role;
+                showDashboard(stage);
+            });
+            loginView.show();
         });
 
         Button statsBtn = new Button("View Advanced Stats");
