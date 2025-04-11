@@ -243,6 +243,7 @@ public class Main extends Application {
             loginView.show();
         });
 
+
         Button statsBtn = new Button("View Advanced Stats");
         statsBtn.setStyle("-fx-background-color: #8B0000; -fx-text-fill: white;");
         TextArea statsOutput = new TextArea();
