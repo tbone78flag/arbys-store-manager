@@ -9,11 +9,11 @@ public class Entry {
     private double profit;
     private String notes;
 
-    public Entry(LocalDate date, double sales, double labor, String notes) {
+    public Entry(LocalDate date, double sales, double labor, double profit, String notes) {
         this.date = date;
         this.sales = sales;
         this.labor = labor;
-        this.profit = sales - labor;
+        this.profit = profit;
         this.notes = notes;
     }
 
